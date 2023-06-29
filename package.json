@@ -13,5 +13,21 @@
   },
   "devDependencies": {
     "nodemon": "^2.0.22"
-  }
+  },
+  "name": "projeto13-batepapo-uol-api",
+  "description": "",
+  "version": "1.0.0",
+  "main": "./src/app.js",
+  "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JeanPiton/projeto13-batepapo-uol-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/JeanPiton/projeto13-batepapo-uol-api/issues"
+  },
+  "homepage": "https://github.com/JeanPiton/projeto13-batepapo-uol-api#readme"
 }
