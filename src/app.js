@@ -41,3 +41,8 @@ server.post('/participants',async (req,res)=>{
         return res.sendStatus(500)
     }
 })
+
+server.get('/participants',async (req,res)=>{
+    const p = await db.collection("participants").find().toArray()
+    res.send(p)
+})
