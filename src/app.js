@@ -3,6 +3,7 @@ import cors from "cors"
 import dotenv from "dotenv"
 import { MongoClient } from "mongodb"
 import dayjs from "dayjs"
+import joi from "joi"
 dotenv.config()
 
 const PORT = 5000
@@ -21,7 +22,9 @@ const db = mongoClient.db()
 
 server.post('/participants',async (req,res)=>{
     const {name} = req.body
-    if(!name || typeof name != 'string'){
+    const scheme = joi.object({name:joi.string().required()})
+    const validation = scheme.validate(req.body)
+    if(validate.error){
         return res.sendStatus(422)
     }
     try{
@@ -55,7 +58,13 @@ server.get('/participants',async (req,res)=>{
 server.post('/messages',async (req,res)=>{
     const {to,text,type} = req.body
     const {user} = req.headers
-    if(!to||!text||(type!="message"&&type!="private_message")||!user||typeof to!='string'||typeof text!= 'string'){
+    const scheme = joi.object({
+        to:joi.string().required(),
+        text:joi.string().required(),
+        type:joi.valid('message','private_message').required()
+    })
+    const validation = scheme.validate(req.body)
+    if(validation.error){
         return res.sendStatus(422)
     }
     try{
