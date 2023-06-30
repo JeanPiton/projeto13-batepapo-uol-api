@@ -50,7 +50,7 @@ server.get('/participants',async (req,res)=>{
         const p = await db.collection("participants").find().toArray()
         res.status(200).send(p)
     }catch(err){
-        return res.sendStatus(444)
+        return res.sendStatus(500)
     }
     
 })
@@ -85,7 +85,7 @@ server.post('/messages',async (req,res)=>{
         res.sendStatus(201)
     }catch(err){
         console.log(err)
-        return res.sendStatus(444)
+        return res.sendStatus(500)
     }
 })
 
@@ -105,9 +105,22 @@ server.get("/messages",async (req,res)=>{
             {to:user},
             {type:"message"},
             {from:user}
-        ]}).limit(parseInt(limit)).toArray()
+        ]}).limit(limit).toArray()
         res.send(messages)
     }catch(err){
-        res.sendStatus(444)
+        res.sendStatus(500)
+    }
+})
+
+server.post("/status",async (req,res)=>{
+    const {user} = req.headers
+    const scheme = joi.object({user:joi.string().required()}).unknown(true)
+    const validation = scheme.validate(req.headers)
+    if(validation.error) return res.sendStatus(404)
+    try{
+        const userDb = await db.collection("participants").findOneAndUpdate({name:user},{$set:{lastStatus:Date.now()}})
+        res.sendStatus(200)
+    }catch(err){
+        res.sendStatus(500)
     }
 })
