@@ -24,7 +24,7 @@ server.post('/participants',async (req,res)=>{
     const {name} = req.body
     const scheme = joi.object({name:joi.string().required()})
     const validation = scheme.validate(req.body)
-    if(validate.error){
+    if(validation.error){
         return res.sendStatus(422)
     }
     try{
@@ -63,8 +63,12 @@ server.post('/messages',async (req,res)=>{
         text:joi.string().required(),
         type:joi.valid('message','private_message').required()
     })
+    const userScheme = joi.object({user:joi.string().required()}).unknown(true)
+    const userValidation = userScheme.validate(req.headers)
     const validation = scheme.validate(req.body)
-    if(validation.error){
+    if(validation.error||userValidation.error){
+        console.log(validation.error)
+        console.log(userValidation.error)
         return res.sendStatus(422)
     }
     try{
@@ -82,5 +86,27 @@ server.post('/messages',async (req,res)=>{
     }catch(err){
         console.log(err)
         return res.sendStatus(444)
+    }
+})
+
+server.get("/messages",async (req,res)=>{
+    const {user} = req.headers
+    const userScheme = joi.object({user:joi.string().required()}).unknown(true)
+    const scheme = joi.object({limit:joi.number().integer().positive().min(1)})
+    const userValidation = userScheme.validate(req.headers)
+    const validation = scheme.validate(req.params)
+    if(validation.error||userValidation.error){
+        return res.sendStatus(422)
+    }
+    try{
+        const messages = await db.collection("messages").find({$or:[
+            {to:"Todos"},
+            {to:user},
+            {type:"message"},
+            {from:user}
+        ]}).toArray()
+        res.send(messages)
+    }catch(err){
+        res.sendStatus(444)
     }
 })
