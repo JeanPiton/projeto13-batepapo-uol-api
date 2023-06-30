@@ -91,10 +91,11 @@ server.post('/messages',async (req,res)=>{
 
 server.get("/messages",async (req,res)=>{
     const {user} = req.headers
+    const {limit} = req.query
     const userScheme = joi.object({user:joi.string().required()}).unknown(true)
     const scheme = joi.object({limit:joi.number().integer().positive().min(1)})
     const userValidation = userScheme.validate(req.headers)
-    const validation = scheme.validate(req.params)
+    const validation = scheme.validate(req.query)
     if(validation.error||userValidation.error){
         return res.sendStatus(422)
     }
@@ -104,7 +105,7 @@ server.get("/messages",async (req,res)=>{
             {to:user},
             {type:"message"},
             {from:user}
-        ]}).toArray()
+        ]}).limit(parseInt(limit)).toArray()
         res.send(messages)
     }catch(err){
         res.sendStatus(444)
