@@ -72,7 +72,7 @@ server.post('/messages',async (req,res)=>{
         return res.sendStatus(422)
     }
     try{
-        if(!await db.collection("participants").find({name:`${user}`}).toArray()){
+        if(!await db.collection("participants").findOne({name:`${user}`})){
             return res.sendStatus(422)
         }
         await db.collection("messages").insertOne({
