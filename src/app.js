@@ -1,7 +1,7 @@
 import express,{json} from "express"
 import cors from "cors"
 import dotenv from "dotenv"
-import { MongoClient } from "mongodb"
+import { MongoClient, ObjectId } from "mongodb"
 import dayjs from "dayjs"
 import joi from "joi"
 dotenv.config()
@@ -140,3 +140,23 @@ setInterval(async ()=>{
         console.log(err)
     }
 },15000)
+
+server.delete("/messages/:ID_DA_MENSAGEM",async (req,res)=>{
+    const {user} = req.headers
+    const id = req.params.ID_DA_MENSAGEM.toString()
+    const scheme = joi.object({user:joi.string().required()})
+    const idScheme = joi.object({id:joi.string().hex().length(24).required()})
+    const validation = scheme.validate({user})
+    const idValidation= idScheme.validate({id})
+    
+    if(validation.error||idValidation.error) return res.sendStatus(422)
+    try{
+        const message = await db.collection("messages").findOne({_id:new ObjectId(id)})
+        if(!message) return res.sendStatus(404)
+        if(message.from != user) return res.sendStatus(401)
+        await db.collection("messages").deleteOne({_id:message._id})
+        res.sendStatus(200)
+    }catch(err){
+        res.sendStatus(500)
+    }
+})
