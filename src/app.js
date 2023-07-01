@@ -118,6 +118,7 @@ server.post("/status",async (req,res)=>{
     if(validation.error) return res.sendStatus(404)
     try{
         const userDb = await db.collection("participants").findOneAndUpdate({name:user},{$set:{lastStatus:Date.now()}})
+        if(userDb.lastErrorObject.updatedExisting===false) return res.sendStatus(404)
         res.sendStatus(200)
     }catch(err){
         res.sendStatus(500)
