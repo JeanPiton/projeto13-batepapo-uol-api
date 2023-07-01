@@ -12,7 +12,7 @@ server.use(cors())
 server.use(json())
 server.listen(PORT,()=>{console.log(`Server running at http://localhost:${PORT}`)})
 
-const mongoClient = new MongoClient(process.env.MONGO_URL)
+const mongoClient = new MongoClient(process.env.DATABASE_URL)
 try{
    mongoClient.connect() 
 }catch(err){
@@ -130,7 +130,6 @@ setInterval(async ()=>{
         const time = Date.now()
         const toDelete = await db.collection("participants").find({lastStatus:{$lt:time-10000}}).toArray()
         await db.collection("participants").deleteMany({lastStatus:{$lt:time-10000}})
-        console.log(toDelete)
         if(toDelete.length){
             const delMessage = toDelete.map(p=>{
                 return {from:p.name,to:"Todos",text:"sai da sala...",type:"status",time:dayjs(time).format("HH:mm:ss")}
