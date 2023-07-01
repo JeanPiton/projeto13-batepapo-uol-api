@@ -160,3 +160,31 @@ server.delete("/messages/:ID_DA_MENSAGEM",async (req,res)=>{
         res.sendStatus(500)
     }
 })
+
+server.put("/messages/:ID_DA_MENSAGEM",async (req,res)=>{
+    const scheme = joi.object({
+        to:joi.string().required(),
+        text:joi.string().required(),
+        type:joi.valid("message","private_message").required()
+    })
+    const userScheme = joi.object({user:joi.string().required()})
+    const idScheme = joi.object({id:joi.string().hex().length(24).required()})
+    const validation = scheme.validate(req.body)
+    const userValidation = userScheme.validate({user:req.headers.user})
+    const idValidation = idScheme.validate({id:req.params.ID_DA_MENSAGEM})
+    
+    if(validation.error||userValidation.error||idValidation.error) return res.sendStatus(422)
+    try{
+        const message = await db.collection("messages").findOne({_id:new ObjectId(idValidation.value.id)})
+        if(!message) return res.sendStatus(404)
+        if(message.from != userValidation.value.user) return res.sendStatus(401)
+        await db.collection("messages").updateOne(message,{$set:{
+            to:validation.value.to,
+            text:validation.value.text,
+            type:validation.value.type
+        }}) 
+        res.sendStatus(200)
+    }catch(err){
+        res.sendStatus(500)
+    }
+})
