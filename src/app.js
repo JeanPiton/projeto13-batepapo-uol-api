@@ -91,9 +91,8 @@ server.post('/messages',async (req,res)=>{
 
 server.get("/messages",async (req,res)=>{
     const {user} = req.headers
-    const {limit} = req.query
     const userScheme = joi.object({user:joi.string().required()}).unknown(true)
-    const scheme = joi.object({limit:joi.number().integer().positive().min(1)})
+    const scheme = joi.object({limit:joi.number().integer().positive().min(1).default(0)})
     const userValidation = userScheme.validate(req.headers)
     const validation = scheme.validate(req.query)
     if(validation.error||userValidation.error){
@@ -105,7 +104,7 @@ server.get("/messages",async (req,res)=>{
             {to:user},
             {type:"message"},
             {from:user}
-        ]}).limit(limit).toArray()
+        ]}).limit(validation.value.limit).toArray()
         res.send(messages)
     }catch(err){
         res.sendStatus(500)
